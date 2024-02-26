@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views import View
+from django.contrib.auth import login,logout
 
 
 # Create your views here.
@@ -17,3 +18,10 @@ class Userlogin(View):
             return 'Sucessfully logged In'
         else:
             return 'Invalid Username or Password'
+
+
+class Userlogout(View):
+    def post(self,request):
+        logout(request)
+        return 'logged out successfully'
+        
