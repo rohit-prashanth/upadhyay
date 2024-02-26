@@ -1,13 +1,19 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views import View
-from django.contrib.auth import login,logout
+from django.contrib.auth import login,logout, authenticate
+from django.contrib.auth.models import User
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .serializers import UserSerializer
 
 
 # Create your views here.
-class Userlogin(View):
+class Userlogin(APIView):
     def get(self,request):
-        return HttpResponse("Hi, You are in Login page..!!")
+        data = User.objects.all()
+        serializer = UserSerializer(data,many=True) 
+        return Response(serializer.data)
 
     def post(self,request):
         username = request.POST["username"]
@@ -15,13 +21,13 @@ class Userlogin(View):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return 'Sucessfully logged In'
+            return {'status' : True}
         else:
-            return 'Invalid Username or Password'
+            return {'status': False}
 
 
 class Userlogout(View):
     def post(self,request):
         logout(request)
-        return 'logged out successfully'
+        return {'status': False}
         
