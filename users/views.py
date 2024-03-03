@@ -17,7 +17,7 @@ class Userlogin(APIView):
 
     def post(self,request):
         query_params = self.request.query_params.dict()
-        return {'query_param': query_params}
+        return Response({'query_param': query_params})
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
         if user is not None:
