@@ -1,10 +1,14 @@
 from django.contrib import admin
-
+from django.contrib.auth.admin import UserAdmin
 # Register your models here.
-from .models import UserMaster
+from .models import UserMaster,Role,UserRoles
 
 
-admin.site.register(UserMaster)
+admin.site.register(UserMaster,UserAdmin)
+admin.site.register(Role)
+admin.site.register(UserRoles)
+
+
 
 # @admin.register(UserMaster)
 # class UniversalAdmin(admin.ModelAdmin):
