@@ -221,4 +221,4 @@ SIMPLE_JWT = {
 
 # APPEND_SLASH = False
 
-AUTH_USER_MODEL = "users.UserMaster"
+# AUTH_USER_MODEL = "users.UserMaster"

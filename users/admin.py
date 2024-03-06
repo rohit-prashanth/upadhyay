@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import UserMaster,Role,UserRoles
 
 
-admin.site.register(UserMaster,UserAdmin)
+admin.site.register(UserMaster)
 admin.site.register(Role)
 admin.site.register(UserRoles)
 
