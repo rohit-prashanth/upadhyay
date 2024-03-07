@@ -19,13 +19,15 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
+    path('permission-denial/', views.PermissionDenial.as_view(), name= 'permission-denial'),
     path('login/', views.Userlogin.as_view(), name= 'userlogin'),
+    path('logout/', views.Userlogout.as_view(), name= 'userlogout'),
     path('create-user/', views.UserCreate.as_view(), name= 'create-user'),
     path('group-permissions/',views.GroupPermissionsClass.as_view(), name= 'group-permissions'),
     path('user-permissions/',views.UserPermissionsClass.as_view(), name= 'group-permissions'),
-    path('user-role/',views.UserRole.as_view(), name= 'user-role'),
-    path('role-master/',views.RoleMaster.as_view(), name= 'role-master'),
-    path('assign-group/',views.AssignGroup.as_view(), name= 'assign-group'),
+    path('create-role/',views.CreateRole.as_view(), name= 'create-role'),
+    # path('role-master/',views.RoleMaster.as_view(), name= 'role-master'),
+    path('assign-user-role/',views.AssignRole.as_view(), name= 'assign-user-role'),
 
 
 

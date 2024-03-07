@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User,Group,Permission
-from .models import UserRoles,Role
+from .models import UserRoles,Role,User
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -48,7 +48,9 @@ class UserRoleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class RoleMasterSerializer(serializers.ModelSerializer):
+class CreateRoleSerializer(serializers.ModelSerializer):
+    
+    
     class Meta:
         model = Role
         fields = '__all__'
