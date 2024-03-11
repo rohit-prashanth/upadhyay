@@ -5,6 +5,7 @@ from django.contrib.auth import login,logout, authenticate
 from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from .serializers import UserSerializer,GroupPermissionsSerializer,UserPermissionsSerializer,UserRoleSerializer,CreateRoleSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -24,7 +25,8 @@ class PermissionDenial(APIView):
 
 
 # Create your views here.
-class Userlogin(APIView):
+class Userlogin(GenericAPIView):
+    
     def get_tokens_for_user(self,user):
                     refresh = RefreshToken.for_user(user)
                     return {
@@ -57,7 +59,7 @@ class Userlogin(APIView):
             return Response({'status': False})
 
 
-class Userlogout(APIView):
+class Userlogout(GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     def post(self,request):
@@ -66,11 +68,12 @@ class Userlogout(APIView):
         
 
 
-class UserCreate(APIView,PermissionRequiredMixin):
+class UserCreate(PermissionRequiredMixin,GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     permission_required = ['User.add_user','User.view_user','User.change_user','user.delete_user']
     permission_denied_message = {"details":"UnAuthorised"}
+    serializer_class = UserSerializer
     
     def get(self,request):
         user = User.objects.first()
@@ -97,12 +100,13 @@ class UserCreate(APIView,PermissionRequiredMixin):
              return Response(str(e))
         
 
-class GroupPermissionsClass(PermissionRequiredMixin,APIView):
+class GroupPermissionsClass(PermissionRequiredMixin,GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     permission_required = "auth.view_group"
     raise_exception = False
     login_url = '/permission-denial/'
+    serializer_class = GroupPermissionsSerializer
     
 
     def get(self,request):
@@ -120,13 +124,13 @@ class GroupPermissionsClass(PermissionRequiredMixin,APIView):
     #     data = request.data
 
 
-class AssignRole(PermissionRequiredMixin,APIView):
+class AssignRole(PermissionRequiredMixin,GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     permission_required = ["auth.view_group","auth.change_user"]
     raise_exception = False
     login_url = '/permission-denial/'
-
+    serializer_class = UserSerializer
 
     def post(self,request):
         try:
@@ -151,13 +155,13 @@ class AssignRole(PermissionRequiredMixin,APIView):
         except Exception as e:
             return Response(str(e))
 
-class UserPermissionsClass(PermissionRequiredMixin,APIView):
+class UserPermissionsClass(PermissionRequiredMixin,GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     permission_required = ["auth.view_permission","auth.add_permission","auth.change_permission"]
     raise_exception = False
     login_url = '/permission-denial/'
-     
+    serializer_class = UserPermissionsSerializer
 
     def get(self,request):
           
@@ -168,13 +172,14 @@ class UserPermissionsClass(PermissionRequiredMixin,APIView):
         return Response(serializers.data,status=status.HTTP_200_OK)
 
 
-class CreateRole(PermissionRequiredMixin,APIView):
+class CreateRole(PermissionRequiredMixin,GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     permission_required = ["users.view_userrole","users.add_userrole"]
     #,"users.add_userroles","users.change_userroles"
     raise_exception = False
     login_url = '/permission-denial/'
+    serializer_class = CreateRoleSerializer
 
     def get(self,request):
         print(request.user.id)
