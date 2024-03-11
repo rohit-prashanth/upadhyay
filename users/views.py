@@ -25,8 +25,8 @@ class PermissionDenial(APIView):
 
 
 # Create your views here.
-class Userlogin(GenericAPIView):
-    
+class Userlogin(APIView):
+
     def get_tokens_for_user(self,user):
                     refresh = RefreshToken.for_user(user)
                     return {
@@ -42,46 +42,59 @@ class Userlogin(GenericAPIView):
         return Response({"status":"Not Found"},status=status.HTTP_404_NOT_FOUND)
 
     def post(self,request):
-        query_params = request.data
-        if "userName" in query_params and "password" in query_params:
-            username = query_params["userName"]
-            password = query_params["password"]
-            user = authenticate(request, username=username, password=password)
-            print(user)
-            if user is not None:
-                login(request, user)
-                token = self.get_tokens_for_user(user)
-                return Response({'status' : True, 'token' : token})
+        try:
+            query_params = request.data
+            if "userName" in query_params and "password" in query_params:
+                username = query_params["userName"]
+                password = query_params["password"]
+                user = authenticate(request, username=username, password=password)
+                print(user)
+                if user is not None:
+                    login(request, user)
+                    token = self.get_tokens_for_user(user)
+                    return Response({'status' : True, 'token' : token})
+                else:
+                    return Response({'status': False})
+                
             else:
                 return Response({'status': False})
-            
-        else:
-            return Response({'status': False})
-
+        
+        except Exception as e:
+             return Response(str(e))
 
 class Userlogout(GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     def post(self,request):
-        logout(request)
-        return Response({'status': True})
+        try:
+            logout(request)
+            return Response({'status': True})
+        except Exception as e:
+             return Response(str(e))
+
         
 
 
 class UserCreate(PermissionRequiredMixin,GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    permission_required = ['User.add_user','User.view_user','User.change_user','user.delete_user']
+    permission_required = ['User.add_user']
     permission_denied_message = {"details":"UnAuthorised"}
+    raise_exception = False
+    login_url = '/permission-denial/'
     serializer_class = UserSerializer
     
+    
     def get(self,request):
-        user = User.objects.first()
-        # all_fields = user._meta.get_fields()
+        try:
+            user = User.objects.first()
+            # all_fields = user._meta.get_fields()
 
-        # print(all_fields)
-        serializers = UserSerializer(user)
-        return Response({"fields":serializers.data})
+            # print(all_fields)
+            serializers = UserSerializer(user)
+            return Response({"fields":serializers.data})
+        except Exception as e:
+             return Response(str(e))
 
 
     def post(self,request):
@@ -164,12 +177,13 @@ class UserPermissionsClass(PermissionRequiredMixin,GenericAPIView):
     serializer_class = UserPermissionsSerializer
 
     def get(self,request):
-          
-        group_list = Permission.objects.all()
+        try:
+            group_list = Permission.objects.all()
+            serializers = UserPermissionsSerializer(group_list, many=True)
+            return Response(serializers.data,status=status.HTTP_200_OK)
 
-        serializers = UserPermissionsSerializer(group_list, many=True)
-
-        return Response(serializers.data,status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(str(e))
 
 
 class CreateRole(PermissionRequiredMixin,GenericAPIView):
@@ -182,32 +196,38 @@ class CreateRole(PermissionRequiredMixin,GenericAPIView):
     serializer_class = CreateRoleSerializer
 
     def get(self,request):
-        print(request.user.id)
-         
-        role = Role.objects.all()
-        if role:
-            serializers = CreateRoleSerializer(role)
-            return Response(serializers.data,status=status.HTTP_200_OK)
-        return Response({"status":False},status=status.HTTP_404_NOT_FOUND)
+        try:
+            print(request.user.id)
+            
+            role = Role.objects.all()
+            if role:
+                serializers = CreateRoleSerializer(role)
+                return Response(serializers.data,status=status.HTTP_200_OK)
+            return Response({"status":False},status=status.HTTP_404_NOT_FOUND)
+        
+        except Exception as e:
+            return Response(str(e))
 
     def post(self,request):
-         
-        data = request.data
-        # group_ids = data.pop("group_ids")
-        user_id = self.request.user.id
-        print(user_id)
-        data['created_by'] = user_id
-        data['modified_by'] = user_id
-        print(data)
+        try: 
+            data = request.data
+            # group_ids = data.pop("group_ids")
+            user_id = self.request.user.id
+            print(user_id)
+            data['created_by'] = user_id
+            data['modified_by'] = user_id
+            print(data)
 
-        serializers = CreateRoleSerializer(data=data)
+            serializers = CreateRoleSerializer(data=data)
 
-        if serializers.is_valid():
-            serializers.save()
-            return Response(serializers.data,status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializers.errors)
+            if serializers.is_valid():
+                serializers.save()
+                return Response(serializers.data,status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializers.errors)
         
+        except Exception as e:
+            return Response(str(e))
 
 
 

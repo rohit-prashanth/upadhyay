@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'users',
     'admissions',
+    'organization'
 ]
 
 MIDDLEWARE = [

@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
+from organization.models import Organization
 
 
 class Role(models.Model):
@@ -19,10 +20,10 @@ class Role(models.Model):
 	# 								#related_name='user_roles')
 	# 								#db_table='user_roles')
 	is_active = models.BooleanField(default=True)
-	# organization = models.ForeignKey('organization.Organization', 
-	# 								related_name="role", 
-	# 								null=True,
-	# 								 on_delete=models.SET_NULL)
+	organization = models.ForeignKey(Organization, 
+									related_name="role_org", 
+									null=True,
+									 on_delete=models.SET_NULL)
 	date_created = models.DateTimeField(auto_now_add=True)
 	date_last_modified = models.DateTimeField(null=True,auto_now=True)
 	created_by = models.ForeignKey(User, 
@@ -61,9 +62,14 @@ class UserRoles(models.Model):
 
 class UserMaster(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
-    choice = (("Male","M"),
-                ("Female","F"))
+    choice = (("Male","M"),("Female","F"))
     gender = models.CharField(max_length=10,choices=choice,blank=True,null=True)
+	
+    organization = models.ForeignKey(Organization, 
+									related_name="user_org", 
+									null=True,
+									 on_delete=models.SET_NULL)
+
 	
 
 
