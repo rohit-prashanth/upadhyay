@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
-from .serializers import UserSerializer,GroupPermissionsSerializer,UserPermissionsSerializer,UserRoleSerializer,CreateRoleSerializer
+from .serializers import UserSerializer,GroupPermissionsSerializer,UserPermissionsSerializer,UserRoleSerializer,CreateRoleSerializer,RoleListSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -202,7 +202,7 @@ class CreateRole(PermissionRequiredMixin,GenericAPIView):
             
             role = Role.objects.all()
             if role:
-                serializers = self.get_serializer(role,many=True)
+                serializers = RoleListSerializer(role,many=True)
                 return Response(serializers.data,status=status.HTTP_200_OK)
             return Response({"status":False},status=status.HTTP_404_NOT_FOUND)
         

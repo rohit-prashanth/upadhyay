@@ -48,6 +48,10 @@ class UserRoleSerializer(serializers.ModelSerializer):
         model = UserRoles
         fields = '__all__'
 
+class RoleListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = '__all__'
 
 class CreateRoleSerializer(serializers.ModelSerializer):
     # name = serializers.CharField(required=True, max_length=100)
