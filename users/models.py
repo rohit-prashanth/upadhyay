@@ -57,7 +57,10 @@ class UserRoles(models.Model):
 		db_table = "user_roles"
 	
 	def __str__(self):
-		return self.master.username
+		if self.master:
+			return self.master.username
+		else:
+			return ''
 
 
 class UserMaster(models.Model):

@@ -26,7 +26,7 @@ urlpatterns = [
     path('create-user/', views.UserCreate.as_view(), name= 'create-user'),
     path('group-permissions/',views.GroupPermissionsClass.as_view(), name= 'group-permissions'),
     path('user-permissions/',views.UserPermissionsClass.as_view(), name= 'group-permissions'),
-    path('create-role/',views.CreateRole.as_view(), name= 'create-role'),
+    path('role/',views.CreateRole.as_view(), name= 'create-role'),
     # path('role-master/',views.RoleMaster.as_view(), name= 'role-master'),
     path('assign-user-role/',views.AssignRole.as_view(), name= 'assign-user-role'),
 

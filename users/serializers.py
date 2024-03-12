@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User,Group,Permission
 from .models import UserRoles,Role,User
+from organization.models import Organization
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -49,9 +50,36 @@ class UserRoleSerializer(serializers.ModelSerializer):
 
 
 class CreateRoleSerializer(serializers.ModelSerializer):
-    
-    
+    # name = serializers.CharField(required=True, max_length=100)
+    # code = serializers.CharField(required=True, max_length=100)
+    # organization = serializers.IntegerField(required=True,min_value=0)
+    # groups = serializers.ListField(
+    #             child=serializers.IntegerField(min_value=0,required=True)
+    #             )
+
+    # def get_organization(self,value):
+    #     try:
+    #         print("value: ",value, type(value))
+    #         org = Organization.objects.get(pk=value)
+    #         return org
+    #     except Exception as e:  
+    #         return str(e)
     class Meta:
         model = Role
-        fields = '__all__'
+        fields = ['name','code','organization','groups']
 
+    def create(self, validated_data):
+        """
+        Create and return a new `Snippet` instance, given the validated data.
+        """
+        print("Validated_data: ", validated_data)
+        group_ids = validated_data.pop('groups')
+        role = Role.objects.create(**validated_data)
+        for group in group_ids:
+            print( "adding group:", group)
+            role.groups.add(group)
+            
+        print( "returning role:", role)
+        return role 
+        
+        

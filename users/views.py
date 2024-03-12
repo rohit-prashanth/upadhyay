@@ -15,6 +15,7 @@ from rest_framework import viewsets, status
 from .models import UserRoles,Role
 from django.contrib.auth.mixins import PermissionRequiredMixin,AccessMixin,LoginRequiredMixin
 from django.contrib.auth.decorators import permission_required, login_required
+from organization.models import Organization
 
 
 class PermissionDenial(APIView):
@@ -87,11 +88,11 @@ class UserCreate(PermissionRequiredMixin,GenericAPIView):
     
     def get(self,request):
         try:
-            user = User.objects.first()
+            user = User.objects.all()
             # all_fields = user._meta.get_fields()
 
             # print(all_fields)
-            serializers = UserSerializer(user)
+            serializers = self.get_serializer(user,many=True)
             return Response({"fields":serializers.data})
         except Exception as e:
              return Response(str(e))
@@ -101,7 +102,7 @@ class UserCreate(PermissionRequiredMixin,GenericAPIView):
         try:
             data = request.data
 
-            serializers = UserSerializer(data=data)
+            serializers = self.get_serializer(data=data)
 
             if serializers.is_valid():
                 serializers.save()    
@@ -127,7 +128,7 @@ class GroupPermissionsClass(PermissionRequiredMixin,GenericAPIView):
             print(request.user.is_authenticated)
             group_list = Group.objects.all()
 
-            serializers = GroupPermissionsSerializer(group_list, many=True)
+            serializers = self.get_serializer(group_list, many=True)
 
             return Response(serializers.data,status=status.HTTP_200_OK)
         except Exception as e:
@@ -160,7 +161,7 @@ class AssignRole(PermissionRequiredMixin,GenericAPIView):
                 # user.groups.add(group_ids)
                 for group in group_ids:
                     user.groups.add(group)
-                serializer = UserSerializer(user)
+                serializer = self.get_serializer(user)
                 return Response(serializer.data,status=status.HTTP_201_CREATED)
             else:
                 return Response({'status': 'required user_id field'},status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -179,7 +180,7 @@ class UserPermissionsClass(PermissionRequiredMixin,GenericAPIView):
     def get(self,request):
         try:
             group_list = Permission.objects.all()
-            serializers = UserPermissionsSerializer(group_list, many=True)
+            serializers = self.get_serializer(group_list, many=True)
             return Response(serializers.data,status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -201,7 +202,7 @@ class CreateRole(PermissionRequiredMixin,GenericAPIView):
             
             role = Role.objects.all()
             if role:
-                serializers = CreateRoleSerializer(role)
+                serializers = self.get_serializer(role,many=True)
                 return Response(serializers.data,status=status.HTTP_200_OK)
             return Response({"status":False},status=status.HTTP_404_NOT_FOUND)
         
@@ -211,17 +212,19 @@ class CreateRole(PermissionRequiredMixin,GenericAPIView):
     def post(self,request):
         try: 
             data = request.data
-            # group_ids = data.pop("group_ids")
-            user_id = self.request.user.id
-            print(user_id)
-            data['created_by'] = user_id
-            data['modified_by'] = user_id
+            # org_id = data.pop("organization")
+            user = self.request.user
+            print(user)
+            # org = Organization.objects.get(pk=org_id)
+            # data["organization"] = org
+            # data['created_by'] = user_id
+            # data['modified_by'] = user_id
             print(data)
 
-            serializers = CreateRoleSerializer(data=data)
+            serializers = self.get_serializer(data=data)
 
             if serializers.is_valid():
-                serializers.save()
+                serializers.save(created_by=user,modified_by=user)
                 return Response(serializers.data,status=status.HTTP_201_CREATED)
             else:
                 return Response(serializers.errors)
