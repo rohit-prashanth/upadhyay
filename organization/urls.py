@@ -21,7 +21,7 @@ from . import views
 
 urlpatterns = [
     
-    path('org-view', views.Organization.as_view(), name= 'organization'),
+    path('org-view', views.Organizationclass.as_view(), name= 'organization'),
 
 
 

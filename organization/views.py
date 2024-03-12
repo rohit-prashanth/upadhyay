@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
-from .serializers import OrganizationSerializer
+from .serializers import OrganizationSerializer,OrganizationlistSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -17,7 +17,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin,AccessMixin,Login
 from django.contrib.auth.decorators import permission_required, login_required
 
 
-class Organization(PermissionRequiredMixin,GenericAPIView):
+class Organizationclass(PermissionRequiredMixin,GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     permission_required = ['organization.add_organization','organization.view_organization']
@@ -29,7 +29,8 @@ class Organization(PermissionRequiredMixin,GenericAPIView):
     def get(self,request):
         try:
             org = Organization.objects.all()
-            serializer = OrganizationSerializer(org,many=True)
+            print(org)
+            serializer = OrganizationlistSerializer(org,many=True)
 
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e:
@@ -39,10 +40,12 @@ class Organization(PermissionRequiredMixin,GenericAPIView):
     def post(self,request):
         try:
             data = request.data
-            serializer = OrganizationSerializer(data=data)
+            # data['user'] = self.request.user.id
+            print(data)
+            serializer = self.get_serializer(data=data)
 
             if serializer.is_valid():
-                serializer.save()
+                serializer.save(created_by=self.request.user,modified_by=self.request.user)
 
             return Response(serializer.data,status=status.HTTP_200_OK)
 
