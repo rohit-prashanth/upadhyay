@@ -52,7 +52,7 @@ class UserRoles(models.Model):
 									related_name="created_by_user", 
 									null=True,
 								   on_delete=models.SET_NULL)
-	created_date = models.DateTimeField(auto_now_add=True,null=True)
+	created_date = models.DateTimeField(auto_now_add=True)
 	class Meta:
 		db_table = "user_roles"
 	

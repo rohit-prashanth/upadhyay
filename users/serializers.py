@@ -44,9 +44,31 @@ class UserPermissionsSerializer(serializers.ModelSerializer):
 
 
 class UserRoleSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = UserRoles
-        fields = '__all__'
+        fields = ['master','role']
+
+
+    def create(self, validated_data):
+        # user = User.objects.get(pk=validated_data['master'])
+        # print("userrole-user:",user)
+        print(validated_data)
+        # role = Role.objects.get(pk=validated_data['role'])0
+        # print("role-groups: ",role,type(role))
+        for group in validated_data['role'].groups.all():
+            print("group-id: ",group.id,type(group.id))
+            # g_id = Group.objects.get(pk=group.id).id
+            # print("g_id",g_id)
+            # gr = user.groups.all()
+            # print("group:",gr)
+            validated_data['master'].groups.add(group.id)
+        # validated_data['role'] = role
+        # validated_data['master'] = user
+        print(validated_data)
+        userrole = UserRoles.objects.create(**validated_data)
+
+        return userrole
 
 class RoleListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -74,7 +96,7 @@ class CreateRoleSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
-        Create and return a new `Snippet` instance, given the validated data.
+        Create and return a new 'Role` instance, given the validated data.
         """
         print("Validated_data: ", validated_data)
         group_ids = validated_data.pop('groups')

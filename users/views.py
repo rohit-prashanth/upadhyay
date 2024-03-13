@@ -144,25 +144,29 @@ class AssignRole(PermissionRequiredMixin,GenericAPIView):
     permission_required = ["auth.view_group","auth.change_user"]
     raise_exception = False
     login_url = '/permission-denial/'
-    serializer_class = UserSerializer
+    serializer_class = UserRoleSerializer
+
+    def get(self,request):
+        try:
+            userrole = UserRoles.objects.all()
+            serializer = self.get_serializer(userrole,many=True)
+
+            return Response(serializer.data,status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(str(e))
 
     def post(self,request):
         try:
             data = request.data
             print(data)
-            if 'user_id' in data and 'role_id' in data :
+            if 'master' in data and 'role' in data :
                 print(data)
-                user_id = data['user_id']
-                print(user_id)
-                group_ids = data['role_id']
-                user = User.objects.get(pk=user_id)
-                print(user)
-                # user.groups.remove(**group_ids)
-                # user.groups.add(group_ids)
-                for group in group_ids:
-                    user.groups.add(group)
-                serializer = self.get_serializer(user)
-                return Response(serializer.data,status=status.HTTP_201_CREATED)
+                serializer = self.get_serializer(data=data)
+                if serializer.is_valid():
+                    serializer.save(created_by_user=self.request.user)
+                    return Response(serializer.data,status=status.HTTP_201_CREATED)
+                else:
+                    return Response(serializer.errors,status=status.HTTP_406_NOT_ACCEPTABLE)
             else:
                 return Response({'status': 'required user_id field'},status=status.HTTP_406_NOT_ACCEPTABLE)
             
