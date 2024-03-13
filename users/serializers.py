@@ -41,7 +41,11 @@ class UserPermissionsSerializer(serializers.ModelSerializer):
         model = Permission
         fields = '__all__'
 
-
+class UserRoleListSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = UserRoles
+        fields = "__all__"
 
 class UserRoleSerializer(serializers.ModelSerializer):
     
@@ -51,6 +55,7 @@ class UserRoleSerializer(serializers.ModelSerializer):
 
 
     def create(self, validated_data):
+        
         # user = User.objects.get(pk=validated_data['master'])
         # print("userrole-user:",user)
         print(validated_data)
@@ -69,6 +74,7 @@ class UserRoleSerializer(serializers.ModelSerializer):
         userrole = UserRoles.objects.create(**validated_data)
 
         return userrole
+        
 
 class RoleListSerializer(serializers.ModelSerializer):
     class Meta:

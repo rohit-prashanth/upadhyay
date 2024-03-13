@@ -6,7 +6,12 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView
-from .serializers import UserSerializer,GroupPermissionsSerializer,UserPermissionsSerializer,UserRoleSerializer,CreateRoleSerializer,RoleListSerializer
+from .serializers import (
+    UserSerializer,GroupPermissionsSerializer,
+    UserPermissionsSerializer,UserRoleSerializer,
+    CreateRoleSerializer,RoleListSerializer,
+    UserRoleListSerializer
+)
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -63,6 +68,7 @@ class Userlogin(APIView):
         except Exception as e:
              return Response(str(e))
 
+
 class Userlogout(GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -79,7 +85,7 @@ class Userlogout(GenericAPIView):
 class UserCreate(PermissionRequiredMixin,GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    permission_required = ['User.add_user']
+    permission_required = ['User.view_user','User.add_user']
     permission_denied_message = {"details":"UnAuthorised"}
     raise_exception = False
     login_url = '/permission-denial/'
@@ -141,15 +147,15 @@ class GroupPermissionsClass(PermissionRequiredMixin,GenericAPIView):
 class AssignRole(PermissionRequiredMixin,GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    permission_required = ["auth.view_group","auth.change_user"]
-    raise_exception = False
+    permission_required = ["auth.view_userroles","auth.add_userroles"]
+    # raise_exception = False
     login_url = '/permission-denial/'
     serializer_class = UserRoleSerializer
 
     def get(self,request):
         try:
             userrole = UserRoles.objects.all()
-            serializer = self.get_serializer(userrole,many=True)
+            serializer = UserRoleListSerializer(userrole,many=True)
 
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e:
@@ -159,16 +165,16 @@ class AssignRole(PermissionRequiredMixin,GenericAPIView):
         try:
             data = request.data
             print(data)
-            if 'master' in data and 'role' in data :
-                print(data)
+
+            if 'master' in data and 'user' in data:
                 serializer = self.get_serializer(data=data)
-                if serializer.is_valid():
+                if serializer.is_valid(raise_exception=True):
                     serializer.save(created_by_user=self.request.user)
                     return Response(serializer.data,status=status.HTTP_201_CREATED)
                 else:
                     return Response(serializer.errors,status=status.HTTP_406_NOT_ACCEPTABLE)
             else:
-                return Response({'status': 'required user_id field'},status=status.HTTP_406_NOT_ACCEPTABLE)
+                    return Response({"Status":"Missing Required Fields"},status=status.HTTP_406_NOT_ACCEPTABLE)
             
         except Exception as e:
             return Response(str(e))
