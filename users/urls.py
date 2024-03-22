@@ -24,11 +24,15 @@ urlpatterns = [
     path('login/', views.Userlogin.as_view(), name= 'userlogin'),
     path('logout/', views.Userlogout.as_view(), name= 'userlogout'),
     path('create-user/', views.UserCreate.as_view(), name= 'create-user'),
-    path('group-permissions/',views.GroupPermissionsClass.as_view(), name= 'group-permissions'),
-    path('user-permissions/',views.UserPermissionsClass.as_view(), name= 'group-permissions'),
+    path('view-group-permissions/',views.GroupPermissionsClass.as_view(), name= 'view-group-permissions'),
+    path('create-group-permissions/',views.CreateGroupPermissions.as_view(), name= 'create-group-permissions'),
+    path('view-user-permissions/',views.UserPermissionsClass.as_view(), name= 'view-user-permissions'),
+    # path('create-user-permissions/',views.CreateUserPermissions.as_view(), name= 'create-user-permissions'),
+    path('view-roles/',views.ViewRoles.as_view(), name= 'view-role'),
     path('role/',views.CreateRole.as_view(), name= 'create-role'),
     # path('role-master/',views.RoleMaster.as_view(), name= 'role-master'),
-    path('assign-user-role/',views.AssignRole.as_view(), name= 'assign-user-role'),
+    path('view-user-role/',views.ViewUserRole.as_view(), name= 'view-user-role'),
+    path('assign-user-role/',views.AssignUserRole.as_view(), name= 'assign-user-role'),
 
 
 

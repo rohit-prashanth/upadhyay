@@ -10,7 +10,8 @@ from .serializers import (
     UserSerializer,GroupPermissionsSerializer,
     UserPermissionsSerializer,UserRoleSerializer,
     CreateRoleSerializer,RoleListSerializer,
-    UserRoleListSerializer
+    UserRoleListSerializer,
+    CreateGroupPermissionsSerializer,CreateUserPermissionsSerializer
 )
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -143,11 +144,34 @@ class GroupPermissionsClass(PermissionRequiredMixin,GenericAPIView):
     #  def post(self,request):
     #     data = request.data
 
-
-class AssignRole(PermissionRequiredMixin,GenericAPIView):
+class CreateGroupPermissions(PermissionRequiredMixin,GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    permission_required = ["auth.view_userroles","auth.add_userroles"]
+    permission_required = ["auth.add_group","auth.change_group"]
+    raise_exception = False
+    login_url = '/permission-denial/'
+    serializer_class = CreateGroupPermissionsSerializer
+
+    def post(self,request):
+        try:
+            data = request.data
+            if "name" in data and "permissions" in data:
+                serializer = self.get_serializer(data=data)
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    return Response(serializer.data,status=status.HTTP_201_CREATED)
+                else:
+                    return Response(serializer.errors,status=status.HTTP_406_NOT_ACCEPTABLE)
+            else:
+                return Response({"Status":"Missing Required Fields"},status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        except Exception as e:
+            return Response(str(e))
+
+class ViewUserRole(PermissionRequiredMixin,GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    permission_required = ["auth.view_userroles"]
     # raise_exception = False
     login_url = '/permission-denial/'
     serializer_class = UserRoleSerializer
@@ -160,6 +184,23 @@ class AssignRole(PermissionRequiredMixin,GenericAPIView):
             return Response(serializer.data,status=status.HTTP_200_OK)
         except Exception as e:
             return Response(str(e))
+
+class AssignUserRole(PermissionRequiredMixin,GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    permission_required = ["auth.change_userroles","auth.add_userroles"]
+    # raise_exception = False
+    login_url = '/permission-denial/'
+    serializer_class = UserRoleSerializer
+
+    # def get(self,request):
+    #     try:
+    #         userrole = UserRoles.objects.all()
+    #         serializer = UserRoleListSerializer(userrole,many=True)
+
+    #         return Response(serializer.data,status=status.HTTP_200_OK)
+    #     except Exception as e:
+    #         return Response(str(e))
 
     def post(self,request):
         try:
@@ -182,7 +223,7 @@ class AssignRole(PermissionRequiredMixin,GenericAPIView):
 class UserPermissionsClass(PermissionRequiredMixin,GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    permission_required = ["auth.view_permission","auth.add_permission","auth.change_permission"]
+    permission_required = ["auth.view_permission"]
     raise_exception = False
     login_url = '/permission-denial/'
     serializer_class = UserPermissionsSerializer
@@ -197,10 +238,34 @@ class UserPermissionsClass(PermissionRequiredMixin,GenericAPIView):
             return Response(str(e))
 
 
-class CreateRole(PermissionRequiredMixin,GenericAPIView):
+class CreateUserPermissions(PermissionRequiredMixin,GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    permission_required = ["users.view_userrole","users.add_userrole"]
+    permission_required = ["auth.add_permission","auth.change_permission"]
+    raise_exception = False
+    login_url = '/permission-denial/'
+    serializer_class = CreateUserPermissionsSerializer
+
+
+    def post(self,request):
+        try:
+            if 'master' in data and 'user' in data:
+                serializer = self.get_serializer(data=data)
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save(created_by_user=self.request.user)
+                    return Response(serializer.data,status=status.HTTP_201_CREATED)
+                else:
+                    return Response(serializer.errors,status=status.HTTP_406_NOT_ACCEPTABLE)
+            else:
+                    return Response({"Status":"Missing Required Fields"},status=status.HTTP_406_NOT_ACCEPTABLE)
+        except Exception as e:
+            return Response(str(e))
+
+
+class ViewRoles(PermissionRequiredMixin,GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    permission_required = ["users.view_role"]
     #,"users.add_userroles","users.change_userroles"
     raise_exception = False
     login_url = '/permission-denial/'
@@ -218,6 +283,27 @@ class CreateRole(PermissionRequiredMixin,GenericAPIView):
         
         except Exception as e:
             return Response(str(e))
+
+class CreateRole(PermissionRequiredMixin,GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    permission_required = ["users.add_role","users.change_role",]
+    raise_exception = False
+    login_url = '/permission-denial/'
+    serializer_class = CreateRoleSerializer
+
+    # def get(self,request):
+    #     try:
+    #         print(request.user.id)
+            
+    #         role = Role.objects.all()
+    #         if role:
+    #             serializers = RoleListSerializer(role,many=True)
+    #             return Response(serializers.data,status=status.HTTP_200_OK)
+    #         return Response({"status":False},status=status.HTTP_404_NOT_FOUND)
+        
+    #     except Exception as e:
+    #         return Response(str(e))
 
     def post(self,request):
         try: 

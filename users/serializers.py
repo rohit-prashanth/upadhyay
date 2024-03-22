@@ -17,11 +17,19 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self,validated_data):
         data = validated_data
         password = str(data.pop("password"))
+        if "groups" in data.keys():
+            groups = data.pop("groups")
+        else:
+            groups = None
         data['username'] = data['username'].lower()
         user = User.objects.create(**data)
+        if groups:        
+            user.groups.set(groups)
+        else:
+            group = 5
+            user.groups.add(group)
         user.set_password(password)
         user.save()
-
         # # By default user set to participant role
         # role = Role.objects.get(code=settings.PRT)
         # UserRoles.objects.create(id=generate_pk(),role=role,master=user)
@@ -34,12 +42,50 @@ class GroupPermissionsSerializer(serializers.ModelSerializer):
         model = Group
         fields = '__all__'
 
+class CreateGroupPermissionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = '__all__'
+
+    def create(self,validated_data):
+        print("\n",validated_data)
+        permission_ids = validated_data.pop("permissions")
+        print("\nvalidated_data: ",validated_data)
+        group_obj = Group.objects.create(**validated_data)
+        print("\npermissions: ",permission_ids)
+        
+        group_obj.permissions.set(permission_ids)
+
+        return group_obj
 
 
 class UserPermissionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
         fields = '__all__'
+
+
+class CreateUserPermissionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        fields = '__all__'
+
+    def create(self,validated_data):
+        model = validated_data['model']
+        codename = validated_data['codename']
+        name = validated_data['name']
+        from myapp.models import model
+        from django.contrib.auth.models import Permission
+        from django.contrib.contenttypes.models import ContentType
+
+        content_type = ContentType.objects.get_for_model(model)
+        permission = Permission.objects.create(
+            codename=codename,
+            name=name,
+            content_type=content_type,
+        )
+
+        return permission
 
 class UserRoleListSerializer(serializers.ModelSerializer):
     
