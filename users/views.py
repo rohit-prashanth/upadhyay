@@ -83,7 +83,7 @@ class Userlogout(GenericAPIView):
 class ViewUser(PermissionRequiredMixin,GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    permission_required = ['User.view_user','User.add_user']
+    permission_required = ['User.view_user']
     permission_denied_message = {"details":"UnAuthorised"}
     raise_exception = False
     login_url = '/permission-denial/'
