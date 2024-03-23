@@ -10,7 +10,7 @@ from .serializers import (
     UserSerializer,GroupPermissionsSerializer,
     UserPermissionsSerializer,UserRoleSerializer,
     CreateRoleSerializer,RoleListSerializer,
-    UserRoleListSerializer,
+    UserRoleListSerializer, UserViewSerializer,
     CreateGroupPermissionsSerializer,CreateUserPermissionsSerializer
 )
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -80,7 +80,30 @@ class Userlogout(GenericAPIView):
         except Exception as e:
              return Response(str(e))
 
-        
+class ViewUser(PermissionRequiredMixin,GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    permission_required = ['User.view_user','User.add_user']
+    permission_denied_message = {"details":"UnAuthorised"}
+    raise_exception = False
+    login_url = '/permission-denial/'
+    serializer_class = UserViewSerializer
+
+    def get(self,request):
+        try:
+            # meta = request.META
+            token = request.META.get('HTTP_AUTHORIZATION', " ").split(' ')[1]
+            print(request.user)
+            user = User.objects.get(pk = request.user.id)
+            serializer = self.get_serializer(user)
+            print(token)
+            return Response(serializer.data,status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(str(e))
+            
+
+
 
 
 class UserCreate(PermissionRequiredMixin,GenericAPIView):
@@ -93,16 +116,15 @@ class UserCreate(PermissionRequiredMixin,GenericAPIView):
     serializer_class = UserSerializer
     
     
-    def get(self,request):
-        try:
-            user = User.objects.all()
-            # all_fields = user._meta.get_fields()
-
-            # print(all_fields)
-            serializers = self.get_serializer(user,many=True)
-            return Response({"fields":serializers.data})
-        except Exception as e:
-             return Response(str(e))
+    # def get(self,request):
+    #     try:
+    #         user = User.objects.all()
+    #         # all_fields = user._meta.get_fields()
+    #         # print(all_fields)
+    #         serializers = self.get_serializer(user,many=True)
+    #         return Response({"fields":serializers.data})
+    #     except Exception as e:
+    #          return Response(str(e))
 
 
     def post(self,request):
