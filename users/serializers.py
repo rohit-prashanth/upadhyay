@@ -3,6 +3,16 @@ from django.contrib.auth.models import User,Group,Permission
 from .models import UserRoles,Role,User
 from organization.models import Organization
 
+
+class UserViewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        # fields = "__all__"
+        exclude = ["password"]
+
+
+
 class UserSerializer(serializers.ModelSerializer):
 
     # password = serializers.CharField(
