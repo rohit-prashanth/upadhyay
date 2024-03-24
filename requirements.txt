@@ -3,5 +3,4 @@ pip install djangorestframework
 python -m pip install django-cors-headers
 pip install djangorestframework-simplejwt
 drf_yasg
-pkg_resources
 pip install setuptools

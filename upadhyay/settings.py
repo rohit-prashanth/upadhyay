@@ -170,11 +170,16 @@ CORS_ALLOW_HEADERS = (
     "x-requested-with",
 )
 
-
+# 'django.contrib.auth.mixins.PermissionRequiredMixin'
+#'rest_framework.permissions.DjangoModelPermissions'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissions'
+        
+    ]
     
 }
 
